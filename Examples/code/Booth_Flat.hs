@@ -28,7 +28,7 @@ main = do
         config  = MarkovChain inits 0
 
     g       <- create
-    results <- runChain params nepochs config g
+    results <- runChain params nepochs 1 config g
 
     hPutStrLn stderr $ 
         let nAcc  = accepts results

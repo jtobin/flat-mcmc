@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wall #-}
+{-# LANGUAGE BangPatterns #-}
 
 module Numeric.MCMC.Flat (
             MarkovChain(..), Options(..), Ensemble
@@ -15,6 +16,7 @@ import qualified Data.Vector.Unboxed   as U
 import Control.Monad.Par                    (NFData)
 import Control.Monad.Par.Scheds.Direct
 import Control.Monad.Par.Combinator
+import System.IO
 
 -- | Parallel map with a specified granularity.
 parMapChunk :: NFData b => Int -> (a -> b) -> [a] -> Par [b]
@@ -53,6 +55,7 @@ symmetricVariate :: PrimMonad m => Gen (PrimState m) -> m Double
 symmetricVariate g = do
     z <- uniformR (0 :: Double, 1 :: Double) g
     return $! 0.5*(z + 1)^(2 :: Int)
+{-# INLINE symmetricVariate #-}
 
 -- | The result of a single-particle Metropolis accept/reject step.  This 
 --   compares a particle's state to a perturbation made by an affine 
@@ -66,6 +69,7 @@ metropolisResult w0 w1 z zc target =
     let val      = target proposal - target w0 + (fromIntegral (length w0) - 1) * log z
         proposal = zipWith (+) (map (*z) w0) (map (*(1-z)) w1) 
     in  if zc <= min 1 (exp val) then (proposal, 1) else (w0, 0)
+{-# INLINE metropolisResult #-}
 
 -- | Execute Metropolis steps on the particles of a sub-ensemble by
 --   perturbing them with affine transformations based on particles
@@ -92,6 +96,7 @@ executeMoves e0 e1 n g = do
         (newstate, nacc) = (V.fromList . map fst &&& sum . map snd) result
 
     return (newstate, nacc)
+{-# INLINE executeMoves #-}
 
 -- | Perform a Metropolis accept/reject step on the ensemble by
 --   perturbing each element and accepting/rejecting the perturbation in
@@ -113,23 +118,39 @@ metropolisStep state g = do
     return $! 
       MarkovChain (V.concat $ map fst [result0, result1]) 
                   (nacc + snd result0 + snd result1)
+{-# INLINE metropolisStep #-}
 
 -- | Diffuse through states.
 runChain :: Options         -- Options of the Markov chain
          -> Int             -- Number of epochs to iterate the chain
+         -> Int             -- Print every nth iteration.
          -> MarkovChain     -- Initial state of the Markov chain
          -> Gen RealWorld   -- MWC PRNG
          -> IO MarkovChain  -- End state of the Markov chain, wrapped in IO
-runChain params nepochs initConfig g 
-    | nepochs == 0 = return initConfig
-    | otherwise    = do
-        result <- runReaderT (metropolisStep initConfig g) params
-        print result
-        runChain params (nepochs - 1) result g
+runChain opts nepochs thinEvery initConfig g 
+    | l == 0 
+        = error "runChain: ensemble must contain at least one particle"
+    | l < (length . V.head) (ensemble initConfig)
+        = do hPutStrLn stderr $ "runChain: ensemble should be twice as large as "
+                             ++ "the target's dimension.  Continuing anyway."
+             go opts nepochs thinEvery initConfig g
+    | otherwise = go opts nepochs thinEvery initConfig g
+  where 
+    l = V.length (ensemble initConfig)
+    go o n t !c g0 | n == 0 = return c
+                   | n `rem` t /= 0 = do
+                       r <- runReaderT (metropolisStep c g0) o
+                       go o (n - 1) t r g0
+                   | otherwise = do
+                       r <- runReaderT (metropolisStep c g0) o
+                       print r
+                       go o (n - 1) t r g0
+{-# INLINE runChain #-}
 
 -- | A convenience function to read and parse ensemble inits from disk.  
 --   Assumes a text file with one particle per line, where each particle
 --   element is separated by whitespace.
 readInits :: FilePath -> IO Ensemble
 readInits p = fmap (V.fromList . map (map read . words) . lines) (readFile p)
+{-# INLINE readInits #-}
 

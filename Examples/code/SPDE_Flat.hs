@@ -18,23 +18,25 @@ main = do
     args  <- getArgs 
     when (args == []) $ do
         putStrLn  "(flat-mcmc) Stochastic partial differential equation        "
-        putStrLn  "Usage: ./SPDE_Flat <numSteps> <inits> <granularity>         " 
+        putStrLn  "Usage: ./SPDE_Flat <numSteps> <inits> <thinEvery> <granularity>         " 
         putStrLn  "                                                            "
         putStrLn  "numSteps         : Number of Markov chain iterations to run."
         putStrLn  "inits            : Filepath containing points at which to   "
         putStrLn  "                   initialize the ensemble.                 "
+        putStrLn  "thinEvery        : Print every n^th iteration.              "
         putStrLn  "granularity      : Parallel granularity (smaller is finer). "
         exitSuccess
 
     inits <- readInits (args !! 1)
 
-    let nepochs = read (head args) :: Int
-        gran    = read (args !! 2) :: Int
-        params  = Options target (V.length inits) gran
-        config  = MarkovChain inits 0
+    let nepochs   = read (head args) :: Int
+        thinEvery = read (args !! 2) :: Int
+        gran      = read (args !! 3) :: Int
+        params    = Options target (V.length inits) gran
+        config    = MarkovChain inits 0
 
     g       <- create
-    results <- runChain params nepochs config g
+    results <- runChain params nepochs thinEvery config g
 
     hPutStrLn stderr $ 
         let nAcc  = accepts results
