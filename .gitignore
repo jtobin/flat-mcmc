@@ -1,0 +1,9 @@
+.git
+dist
+Setup.hs
+demos
+output
+*swp
+*.hi
+*.o
+.DS_Store
