@@ -1,9 +1,9 @@
 .git
+*swp
+.DS_Store
 dist
 Setup.hs
-demos
-output
-*swp
 *.hi
 *.o
-.DS_Store
+demos
+data

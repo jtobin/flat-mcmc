@@ -16,7 +16,7 @@ build-type:          Simple
 cabal-version:       >=1.8
 Description:
 
-    A general-purpose sampler for anisotropic distributions.
+    Painless general-purpose sampling.
 
 Source-repository head
   Type:     git
