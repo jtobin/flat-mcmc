@@ -7,6 +7,7 @@ synopsis:            Painless general-purpose sampling.
 -- description:         
 homepage:            http://jtobin.github.com/flat-mcmc
 -- license:             
+license:             BSD3
 license-file:        LICENSE
 author:              Jared Tobin
 maintainer:          jared@jtobin.ca
