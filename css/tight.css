@@ -1,0 +1,76 @@
+/*
+ * My minimalist CSS uses some cues from:
+ *
+ * Ethan Schoonover:   http://ethanschoonover.com
+ * Matt Might:         http://matt.might.net
+ * `alpen`:            http://www.colourlovers.com/palette/443995/i_demand_a_pancake
+ * Dan Foreman-Mackey: http://danfm.ca
+ * Akshay Shah:        http://datahackermd.com
+ *
+ */
+
+body    { background-color: #FFFFFF;
+          color: #2E2E2F;
+          font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+          font-weight: 300;
+          font-size: 16px;
+          text-rendering: optimizelegibility; }
+
+header { 
+         vertical-align: baseline; 
+         font-size: 250%;
+         line-height: 100%;
+         a { text-decoration: none;
+             margin-right: 10px; }  }
+
+#shead    { width: 850px;
+            margin: 50px auto; }
+
+#colophon { width: 850px;
+            margin: 50px auto;   
+            padding: 40px;     }
+
+.nav { position: relative;
+       left: 0;
+       display: block;
+       float: left;
+       padding-left: 22px; 
+       margin: 0 10px 0 0; }
+
+.nav.pull-right { float: right;
+                  margin-right: 0; }
+
+#sitelink { color: #474747; 
+            font-size: 150%; }
+
+::-moz-selection { background: #E5FCC2; color: #000000; text-shadow: none; }
+::selection      { background: #E5FCC2; color: #000000; text-shadow: none; }
+
+#main   { width: 850px;
+          margin: 50px auto; }
+
+h1      { font-weight: lighter; 
+          font-size: 355%;    } 
+
+h2      { font-weight: 300; 
+          border-bottom: 1px solid; }
+
+h3      { font-weight: 300;
+          font-size: 255%; }
+
+img     { padding-top: 20px; 
+          padding-bottom: 20px; }
+
+h4      { margin-bottom: 4px; } 
+
+li      { padding: 3px; }
+a       { color: #547980;
+          text-decoration: none; }
+a:hover { color: #45ADA8; }
+
+code    { font-family: monospace; }
+
+p       { margin: 0;
+          padding: 1px;
+          border: 0;  } 
+

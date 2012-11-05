@@ -7,3 +7,8 @@ Setup.hs
 *.o
 demos
 data
+site
+_cache
+_site
+cabal-dev
+build
