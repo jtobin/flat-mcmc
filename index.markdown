@@ -38,13 +38,13 @@ Tailoring good proposals requires local knowledge of the target manifold, which 
 
 ![](img/Rosenbrock_HMC.png)
 
-But HMC's performance is heavily dependent on two tuning parameters, and the algorithm usually requires preliminary calibration runs.  Running the intermediate discretizing steps can also be time-consuming.  
+But HMC's performance is very sensitive to the settings of two tuning parameters, and the algorithm usually requires preliminary calibration runs to get them right.  Running the intermediate discretizing steps can also be time-consuming.  
 
 Another method - also quite quick, and requiring no tuning at all - involves ensemble samplers that are [invariant to affine transformations of space](http://msp.org/camcos/2010/5-1/p04.xhtml).  In essence, they 'flatten' or 'unstretch' the target's parameter space, allowing many particles to explore the distribution locally.  The equivalent work of the Metropolis-Hastings sampler yields something like this:
 
 ![](img/Rosenbrock_AIE.png)
 
-[Good implementations of these algorithms exist](http://danfm.ca/emcee).  Haskell yields some perks; samplers can be compiled, and it is trivial to incorporate nested parallelism for specialized performance if compiled to GHC's threaded runtime.  flat-mcmc supports parallel evaluation of the target function via any of Haskell's available methods:
+[Good implementations of these algorithms exist](http://dan.iel.fm/emcee/).  Haskell yields some perks; samplers can be compiled, and it is trivial to incorporate nested parallelism for specialized performance if compiled to GHC's threaded runtime.  flat-mcmc supports parallel evaluation of the target function via any of Haskell's available methods:
 
 <br>
 <script src="https://gist.github.com/3865601.js?file=gistfile1.hs"></script>
