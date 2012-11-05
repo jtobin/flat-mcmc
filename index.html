@@ -1,0 +1,96 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+
+  <title>flat-mcmc</title>
+  <meta name="jtobin.ca" content>
+  <meta name="Jared Tobin" content>
+
+  <!-- Place favicon.ico in root -->
+  <!-- <link rel="shortcut icon" href="/favicon.ico"> -->
+
+  <link rel="stylesheet" href="./css/style.css">
+
+  <!-- Google analytics code -->
+  <script type="text/javascript">
+  
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-22260080-1']);
+    _gaq.push(['_trackPageview']);
+  
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  
+  </script>
+
+</head>
+
+<body>
+  <div id="container">
+
+    <header id="shead">
+      <a id="sitelink" href="./">flat-mcmc</a>
+      <a class="nav pull-right" href="http://hackage.haskell.org/package/affine-invariant-ensemble-mcmc">hackage</a>
+      <a class="nav pull-right" href="http://github.com/jtobin/affine-invariant-ensemble-mcmc">github</a>
+    </header>
+
+    <div id="main">
+      <h3 id="what-is-this-i-dont-even">what is this i don’t even</h3>
+<p>flat-mcmc is a <a href="http://www.haskell.org">Haskell</a> library for painless, efficient, general-purpose sampling from continuous distributions.</p>
+<p>Sampling is commonly used in Bayesian statistics/machine learning, physics, and finance to approximate difficult integrals or estimate model parameters. Haskell is an advanced functional language emphasizing abstraction, performance, multicore support, and security.</p>
+<h3 id="tell-me-more">tell me more</h3>
+<p>Consider using a Gaussian likelihood model for some data. A conjugate prior yields a posterior that, in parameter space, looks like this:</p>
+<div class="figure">
+<img src="img/1DGaussian.png"></img><p class="caption"></p>
+</div>
+<p>The Metropolis-Hastings algorithm is the ‘go-to’ general-purpose sampler, proposing global moves over both parameters simultaneously:</p>
+<div class="figure">
+<img src="img/1DGaussian_MH.png"></img><p class="caption"></p>
+</div>
+<p>Distributions like this are easy to sample from efficiently. The case is different for <em>anisotropic</em> distributions that are ‘skewed’ or ‘stretched’. They look funny; narrow and correlated, like the Rosenbrock density on the plane:</p>
+<br>
+<script src="https://gist.github.com/3865828.js?file=gistfile1.hs"></script>
+
+<div class="figure">
+<img src="img/Rosenbrock.png"></img><p class="caption"></p>
+</div>
+<p>With some cleverness, the Rosenbrock density can be sampled independently. One thousand independent samples look like this:</p>
+<div class="figure">
+<img src="img/Rosenbrock_IND.png"></img><p class="caption"></p>
+</div>
+<p>Conventional Markov chain samplers have trouble moving around narrow regions of the parameter space. Take fifty thousand iterations of a Metropolis-Hastings sampler, using naive Gaussian ‘bubble’ proposals:</p>
+<div class="figure">
+<img src="img/Rosenbrock_MH.png"></img><p class="caption"></p>
+</div>
+<p>Tailoring good proposals requires local knowledge of the target manifold, which can be particularly unpleasant to incorporate in high dimensions.</p>
+<p><a href="http://www.dcs.gla.ac.uk/inference/rmhmc/">Hamiltonian Monte Carlo (HMC)</a> immediately finds regions of appreciable density, but without extensive tuning has trouble moving into the tails of the distribution:</p>
+<div class="figure">
+<img src="img/Rosenbrock_HMC.png"></img><p class="caption"></p>
+</div>
+<p>Another method requiring no tuning at all involves ensemble samplers that are <a href="http://msp.org/camcos/2010/5-1/p04.xhtml">invariant to affine transformations of space</a>. In essence, they ‘unstretch’ the target’s parameter space, allowing many particles to explore the distribution locally. Half of the work of the Metropolis-Hastings sampler yields something like this:</p>
+<div class="figure">
+<img src="img/Rosenbrock_AIE.png"></img><p class="caption"></p>
+</div>
+<p><a href="http://danfm.ca/emcee">Good implementations of these algorithms exist</a>. Haskell yields some perks; type safety is guaranteed, samplers can be compiled, and it is trivial to incorporate parallelism for specialized performance. flat-mcmc supports parallel evaluation of the target function via any of Haskell’s available methods:</p>
+<br>
+<script src="https://gist.github.com/3865601.js?file=gistfile1.hs"></script>
+<br>
+<p>The GPU can even be invoked for likelihood evaluation by the <em>Accelerate</em> library, though this is untested at present. The sequential performance is quite good:</p>
+<br>
+<script src="https://gist.github.com/3865854.js?file=gistfile1.txt"></script>
+<br>
+<h3 id="join-the-club">join the club</h3>
+<p>Pull requests welcome. If you find this work useful in your research, please cite it as</p>
+<ul>
+<li>Tobin, J. (2012) flat-mcmc: A library for efficient, general purpose sampling. <a href="jtobin.github.com/flat-mcmc">jtobin.github.com/flat-mcmc</a></li>
+</ul>
+<p>flat-mcmc is written and maintained by <a href="http://jtobin.ca">Jared Tobin</a>. Page generated with <a href="http://jaspervdj.be/hakyll/">Hakyll</a>.</p>
+    </div>
+
+  </div>
+</body>
+
+</html>
