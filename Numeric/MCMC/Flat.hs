@@ -16,6 +16,7 @@ import qualified Data.Vector.Unboxed   as U
 import Control.Monad.Par                    (NFData)
 import Control.Monad.Par.Scheds.Direct
 import Control.Monad.Par.Combinator
+import GHC.Float
 import System.IO
 
 -- | Parallel map with a specified granularity.
@@ -34,7 +35,7 @@ data MarkovChain = MarkovChain { ensemble :: Ensemble
 
 -- | Display the current state.  This will be very slow and should be replaced.
 instance Show MarkovChain where
-    show config = filter (`notElem` "[]") $ unlines $ map show (V.toList (ensemble config))
+    show config = filter (`notElem` "[]") $ unlines $ map (show . map double2Float) (V.toList (ensemble config))
 
 -- | Options for the chain.  The target (expected to be a log density), as
 --   well as the size of the ensemble.  The size should be an even number.  Also
