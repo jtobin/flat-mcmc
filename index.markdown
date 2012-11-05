@@ -42,13 +42,13 @@ Another method requiring no tuning at all involves ensemble samplers that are [i
 
 ![](img/Rosenbrock_AIE.png)
 
-[Good implementations of these algorithms exist](http://danfm.ca/emcee).  Haskell yields some perks; samplers can be compiled, and it is trivial to incorporate nested parallelism for specialized performance.  flat-mcmc supports parallel evaluation of the target function via any of Haskell's available methods.  Using the Par monad, for example:
+[Good implementations of these algorithms exist](http://danfm.ca/emcee).  Haskell yields some perks; samplers can be compiled, and it is trivial to incorporate nested parallelism for specialized performance if compiled to GHC's threaded runtime.  flat-mcmc supports parallel evaluation of the target function via any of Haskell's available methods.  Using the Par monad, for example:
 
 <br>
 <script src="https://gist.github.com/3865601.js?file=gistfile1.hs"></script>
 <br>
 
-flat-mcmc also supports **nested** parallelism, in that these function evaluations will also be executed in parallel on each iteration if compiled with GHC's threaded runtime.  Performance is quite good:
+Additionally, the ensemble's particles are perturbed in parallel on each iteration of the Markov chain.  Performance is quite good:
 
 <br>
 <script src="https://gist.github.com/3865854.js?file=gistfile1.txt"></script>
