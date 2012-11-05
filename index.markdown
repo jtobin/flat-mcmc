@@ -34,7 +34,7 @@ Conventional Markov chain samplers have trouble moving around narrow regions of 
 
 Tailoring good proposals requires local knowledge of the target manifold, which can be particularly unpleasant to incorporate in high dimensions. 
 
-[Hamiltonian Monte Carlo (HMC)](http://www.dcs.gla.ac.uk/inference/rmhmc/) immediately finds regions of appreciable density, but without extensive tuning has trouble moving into the tails of the distribution:
+[Hamiltonian Monte Carlo (HMC)](http://github.com/jtobin/hasty-hamiltonian) immediately finds regions of appreciable density, but without extensive tuning has trouble moving into the tails of the distribution:
 
 ![](img/Rosenbrock_HMC.png)
 
@@ -42,13 +42,13 @@ Another method requiring no tuning at all involves ensemble samplers that are [i
 
 ![](img/Rosenbrock_AIE.png)
 
-[Good implementations of these algorithms exist](http://danfm.ca/emcee).  Haskell yields some perks; type safety is guaranteed, samplers can be compiled, and it is trivial to incorporate parallelism for specialized performance.  flat-mcmc supports parallel evaluation of the target function via any of Haskell's available methods:
+[Good implementations of these algorithms exist](http://danfm.ca/emcee).  Haskell yields some perks; samplers can be compiled, and it is trivial to incorporate nested parallelism for specialized performance.  flat-mcmc supports parallel evaluation of the target function via any of Haskell's available methods.  Using the Par monad, for example:
 
 <br>
 <script src="https://gist.github.com/3865601.js?file=gistfile1.hs"></script>
 <br>
 
-The GPU can even be invoked for likelihood evaluation by the *Accelerate* library, though this is untested at present.  The sequential performance is quite good:
+Each of those parallel evaluations will then be executed in parallel with others.  The library's performance is quite good:
 
 <br>
 <script src="https://gist.github.com/3865854.js?file=gistfile1.txt"></script>
