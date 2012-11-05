@@ -48,7 +48,7 @@ Another method requiring no tuning at all involves ensemble samplers that are [i
 <script src="https://gist.github.com/3865601.js?file=gistfile1.hs"></script>
 <br>
 
-Each of those parallel evaluations will then be executed in parallel with others.  The library's performance is quite good:
+flat-mcmc also supports **nested** parallelism, in that these function evaluations will also be executed in parallel on each iteration if compiled with GHC's threaded runtime.  Performance is quite good:
 
 <br>
 <script src="https://gist.github.com/3865854.js?file=gistfile1.txt"></script>

@@ -33,8 +33,8 @@
 
     <header id="shead">
       <a id="sitelink" href="./">flat-mcmc</a>
-      <a class="nav pull-right" href="http://hackage.haskell.org/package/affine-invariant-ensemble-mcmc">hackage</a>
-      <a class="nav pull-right" href="http://github.com/jtobin/affine-invariant-ensemble-mcmc">github</a>
+      <a class="nav pull-right" href="http://hackage.haskell.org/package/flat-mcmc">hackage</a>
+      <a class="nav pull-right" href="http://github.com/jtobin/flat-mcmc">github</a>
     </header>
 
     <div id="main">
@@ -66,7 +66,7 @@
 <img src="img/Rosenbrock_MH.png"></img><p class="caption"></p>
 </div>
 <p>Tailoring good proposals requires local knowledge of the target manifold, which can be particularly unpleasant to incorporate in high dimensions.</p>
-<p><a href="http://www.dcs.gla.ac.uk/inference/rmhmc/">Hamiltonian Monte Carlo (HMC)</a> immediately finds regions of appreciable density, but without extensive tuning has trouble moving into the tails of the distribution:</p>
+<p><a href="http://github.com/jtobin/hasty-hamiltonian">Hamiltonian Monte Carlo (HMC)</a> immediately finds regions of appreciable density, but without extensive tuning has trouble moving into the tails of the distribution:</p>
 <div class="figure">
 <img src="img/Rosenbrock_HMC.png"></img><p class="caption"></p>
 </div>
@@ -74,11 +74,11 @@
 <div class="figure">
 <img src="img/Rosenbrock_AIE.png"></img><p class="caption"></p>
 </div>
-<p><a href="http://danfm.ca/emcee">Good implementations of these algorithms exist</a>. Haskell yields some perks; type safety is guaranteed, samplers can be compiled, and it is trivial to incorporate parallelism for specialized performance. flat-mcmc supports parallel evaluation of the target function via any of Haskell’s available methods:</p>
+<p><a href="http://danfm.ca/emcee">Good implementations of these algorithms exist</a>. Haskell yields some perks; samplers can be compiled, and it is trivial to incorporate nested parallelism for specialized performance. flat-mcmc supports parallel evaluation of the target function via any of Haskell’s available methods. Using the Par monad, for example:</p>
 <br>
 <script src="https://gist.github.com/3865601.js?file=gistfile1.hs"></script>
 <br>
-<p>The GPU can even be invoked for likelihood evaluation by the <em>Accelerate</em> library, though this is untested at present. The sequential performance is quite good:</p>
+<p>flat-mcmc also supports <strong>nested</strong> parallelism, in that these function evaluations will also be executed in parallel on each iteration if compiled with GHC’s threaded runtime. Performance is quite good:</p>
 <br>
 <script src="https://gist.github.com/3865854.js?file=gistfile1.txt"></script>
 <br>
