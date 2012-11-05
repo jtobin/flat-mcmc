@@ -34,21 +34,23 @@ Conventional Markov chain samplers have trouble moving around narrow regions of 
 
 Tailoring good proposals requires local knowledge of the target manifold, which can be particularly unpleasant to incorporate in high dimensions. 
 
-[Hamiltonian Monte Carlo (HMC)](http://github.com/jtobin/hasty-hamiltonian) immediately finds regions of appreciable density, but without extensive tuning has trouble moving into the tails of the distribution:
+[Hamiltonian Monte Carlo (HMC)](http://github.com/jtobin/hasty-hamiltonian) immediately finds regions of appreciable density and moves quickly through the parameter space.  Three thousand iterations, at 20 discretizing steps per iteration, yields this:
 
 ![](img/Rosenbrock_HMC.png)
 
-Another method requiring no tuning at all involves ensemble samplers that are [invariant to affine transformations of space](http://msp.org/camcos/2010/5-1/p04.xhtml).  In essence, they 'unstretch' the target's parameter space, allowing many particles to explore the distribution locally.  Half of the work of the Metropolis-Hastings sampler yields something like this:
+But HMC's performance is heavily dependent on two tuning parameters, and the algorithm usually requires preliminary calibration runs.  Running the intermediate discretizing steps can also be time-consuming.  
+
+Another method - also quite quick, and requiring no tuning at all - involves ensemble samplers that are [invariant to affine transformations of space](http://msp.org/camcos/2010/5-1/p04.xhtml).  In essence, they 'flatten' or 'unstretch' the target's parameter space, allowing many particles to explore the distribution locally.  The equivalent work of the Metropolis-Hastings sampler yields something like this:
 
 ![](img/Rosenbrock_AIE.png)
 
-[Good implementations of these algorithms exist](http://danfm.ca/emcee).  Haskell yields some perks; samplers can be compiled, and it is trivial to incorporate nested parallelism for specialized performance if compiled to GHC's threaded runtime.  flat-mcmc supports parallel evaluation of the target function via any of Haskell's available methods.  Using the Par monad, for example:
+[Good implementations of these algorithms exist](http://danfm.ca/emcee).  Haskell yields some perks; samplers can be compiled, and it is trivial to incorporate nested parallelism for specialized performance if compiled to GHC's threaded runtime.  flat-mcmc supports parallel evaluation of the target function via any of Haskell's available methods:
 
 <br>
 <script src="https://gist.github.com/3865601.js?file=gistfile1.hs"></script>
 <br>
 
-Additionally, the ensemble's particles are perturbed in parallel on each iteration of the Markov chain.  Performance is quite good:
+and additionally, the ensemble's particles are perturbed in parallel on each iteration of the Markov chain.  Performance is quite good:
 
 <br>
 <script src="https://gist.github.com/3865854.js?file=gistfile1.txt"></script>
