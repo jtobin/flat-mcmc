@@ -81,7 +81,7 @@ But using four cores shaves about twenty minutes off:
 
 ### join the club
 
-Pull requests welcome.  If you find this work useful in your research, please cite it as 
+Pull requests and bug reports welcome.  If you find this work useful in your research, please cite it as 
 
 *   Tobin, J. (2012) flat-mcmc: A library for efficient, general purpose sampling.  [jtobin.github.com/flat-mcmc](jtobin.github.com/flat-mcmc)
 
