@@ -79,9 +79,23 @@
 <br>
 <script src="https://gist.github.com/3865601.js?file=gistfile1.hs"></script>
 <br>
-<p>and additionally, the ensemble’s particles are perturbed in parallel on each iteration of the Markov chain. Performance is quite good:</p>
+<p>and additionally, the ensemble’s particles are perturbed in parallel on each iteration of the Markov chain.</p>
+<h3 id="but-does-it-blend">but does it blend</h3>
+<p>For smaller problems, the overhead of scheduling parallel computations will outweigh any gains made from using multiple cores. If the target function is fairly simple, or if the Markov ensemble contains relatively few particles, then it’s better to compile without the threaded runtime. Sequential performance is quite good:</p>
 <br>
 <script src="https://gist.github.com/3865854.js?file=gistfile1.txt"></script>
+<br>
+<p>Parallelism gains will manifest on problems with more expensive likelihoods, or when the Markov ensemble contains relatively many particles. Consider a 100-dimensional discretized stochastic PDE, expressed by the following recursive worker/wrapper function:</p>
+<br>
+<script src="https://gist.github.com/4028961.js?file=gistfile1.hs"></script>
+<br>
+<p>Run the chain for a million iterations, printing every 1000th to stdout; without the threaded runtime, the sequential sampler takes on the order of an hour:</p>
+<br>
+<script src="https://gist.github.com/4029008.js?file=gistfile1.txt"></script>
+</br>
+<p>But using four cores shaves about twenty minutes off:</p>
+<br>
+<script src="https://gist.github.com/4029005.js?file=gistfile1.txt"></script>
 <br>
 <h3 id="join-the-club">join the club</h3>
 <p>Pull requests welcome. If you find this work useful in your research, please cite it as</p>

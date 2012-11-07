@@ -50,11 +50,34 @@ Another method - also quite quick, and requiring no tuning at all - involves ens
 <script src="https://gist.github.com/3865601.js?file=gistfile1.hs"></script>
 <br>
 
-and additionally, the ensemble's particles are perturbed in parallel on each iteration of the Markov chain.  Performance is quite good:
+and additionally, the ensemble's particles are perturbed in parallel on each iteration of the Markov chain.  
+
+### but does it blend
+
+For smaller problems, the overhead of scheduling parallel computations will outweigh any gains made from using multiple cores.  If the target function is fairly simple, or if the Markov ensemble contains relatively few particles, then it's better to compile without the threaded runtime.  Sequential performance is quite good: 
 
 <br>
 <script src="https://gist.github.com/3865854.js?file=gistfile1.txt"></script>
 <br>
+
+Parallelism gains will manifest on problems with more expensive likelihoods, or when the Markov ensemble contains relatively many particles.  Consider a 100-dimensional discretized stochastic PDE, expressed by the following recursive worker/wrapper function:
+
+<br>
+<script src="https://gist.github.com/4028961.js?file=gistfile1.hs"></script>
+<br>
+
+Run the chain for a million iterations, printing every 1000th to stdout; without the threaded runtime, the sequential sampler takes on the order of an hour:
+
+<br>
+<script src="https://gist.github.com/4029008.js?file=gistfile1.txt"></script>
+</br>
+
+But using four cores shaves about twenty minutes off:
+
+<br>
+<script src="https://gist.github.com/4029005.js?file=gistfile1.txt"></script>
+<br>
+
 
 ### join the club
 
