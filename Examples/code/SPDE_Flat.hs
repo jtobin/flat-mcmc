@@ -10,8 +10,8 @@ import qualified Data.Vector as V
 
 target :: [Double] -> Double
 target xs = go 0 0 xs 
-  where go !t0 !t1 []         = (-t0 / (2*h)) - (0.5*h*t1)
-        go !t0 !t1 (u:us:uss) = go (t0 + (us - u)^2) (t1 + v (us + u)) uss
+  where go t0 t1 []         = (-t0 / (2*h)) - (0.5*h*t1)
+        go t0 t1 (u:us:uss) = go (t0 + (us - u)^2) (t1 + v (us + u)) uss
         h   = 1 / fromIntegral (length xs)
         v x = (1 - x^2)^2
 {-# INLINE target #-}

@@ -12,3 +12,4 @@ _site/
 build
 cabal-dev
 site
+benchmarks
