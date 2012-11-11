@@ -1,5 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
-
 import System.IO
 import System.Exit
 import System.Environment
@@ -20,12 +18,13 @@ main = do
     args  <- getArgs 
     when (args == []) $ do
         putStrLn  "(flat-mcmc) Stochastic partial differential equation        "
-        putStrLn  "Usage: ./SPDE_Flat <numSteps> <inits> <thinEvery> <granularity>         " 
+        putStrLn  "Usage: ./SPDE_Flat <numSteps> <inits> <thinEvery> <burnIn> <granularity>         " 
         putStrLn  "                                                            "
         putStrLn  "numSteps         : Number of Markov chain iterations to run."
         putStrLn  "inits            : Filepath containing points at which to   "
         putStrLn  "                   initialize the ensemble.                 "
         putStrLn  "thinEvery        : Print every n^th iteration.              "
+        putStrLn  "burnIn           : Number of burn-in steps.                 "
         putStrLn  "granularity      : Parallel granularity (smaller is finer). "
         exitSuccess
 
@@ -33,12 +32,13 @@ main = do
 
     let nepochs   = read (head args) :: Int
         thinEvery = read (args !! 2) :: Int
-        gran      = read (args !! 3) :: Int
+        burnIn    = read (args !! 3) :: Int
+        gran      = read (args !! 4) :: Int
         params    = Options target (V.length inits) gran
         config    = MarkovChain inits 0
 
     g       <- create
-    results <- runChain params nepochs thinEvery config g
+    results <- runChain params nepochs burnIn thinEvery config g
 
     hPutStrLn stderr $ 
         let nAcc  = accepts results

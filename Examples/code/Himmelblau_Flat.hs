@@ -14,21 +14,23 @@ main = do
     args  <- getArgs 
     when (args == []) $ do
         putStrLn  "(flat-mcmc) Himmelblau density                              "
-        putStrLn  "Usage: ./Himmelblau_Flat <numSteps> <inits>                 " 
+        putStrLn  "Usage: ./Himmelblau_Flat <numSteps> <burnIn> <inits>        " 
         putStrLn  "                                                            "
         putStrLn  "numSteps         : Number of Markov chain iterations to run."
+        putStrLn  "burnIn           : Number of burn-in steps to perform.      "
         putStrLn  "inits            : Filepath containing points at which to   "
         putStrLn  "                   initialize the ensemble.                 "
         exitSuccess
 
-    inits <- readInits (args !! 1)
+    inits <- readInits (args !! 2)
 
     let nepochs = read (head args) :: Int
+        burnIn  = read (args !! 1) :: Int
         params  = Options     target (V.length inits) 30
         config  = MarkovChain inits 0
 
     g       <- create
-    results <- runChain params nepochs 1 config g
+    results <- runChain params nepochs burnIn 1 config g
 
     hPutStrLn stderr $ 
         let nAcc  = accepts results

@@ -124,21 +124,26 @@ metropolisStep state g = do
 -- | Diffuse through states.
 runChain :: Options         -- Options of the Markov chain
          -> Int             -- Number of epochs to iterate the chain
+         -> Int             -- Burn-in period
          -> Int             -- Print every nth iteration.
          -> MarkovChain     -- Initial state of the Markov chain
          -> Gen RealWorld   -- MWC PRNG
          -> IO MarkovChain  -- End state of the Markov chain, wrapped in IO
-runChain opts nepochs thinEvery initConfig g 
+runChain opts nepochs burnIn thinEvery initConfig g 
     | l == 0 
         = error "runChain: ensemble must contain at least one particle"
     | l < (length . V.head) (ensemble initConfig)
         = do hPutStrLn stderr $ "runChain: ensemble should be twice as large as "
                              ++ "the target's dimension.  Continuing anyway."
              go opts nepochs thinEvery initConfig g
+    | burnIn < 0 || thinEvery < 0 = error "runChain: nonsensical burn-in or thinning input."
     | otherwise = go opts nepochs thinEvery initConfig g
   where 
     l = V.length (ensemble initConfig)
     go o n t !c g0 | n == 0 = return c
+                   | n > (nepochs - burnIn) = do
+                       r <- runReaderT (metropolisStep c g0) o
+                       go o (n - 1) t r g0 
                    | n `rem` t /= 0 = do
                        r <- runReaderT (metropolisStep c g0) o
                        go o (n - 1) t r g0
