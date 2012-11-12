@@ -3,7 +3,7 @@ title: flat-mcmc
 ---
 ### what is this i don't even
 
-flat-mcmc is a [Haskell](http://www.haskell.org) library for painless, efficient, general-purpose sampling from continuous distributions.  
+**flat-mcmc** is a [Haskell](http://www.haskell.org) library for painless, efficient, general-purpose sampling from continuous distributions.  
 
 Sampling is commonly used in Bayesian statistics/machine learning, physics, and finance to approximate difficult integrals or estimate model parameters.  Haskell is an advanced functional language emphasizing abstraction, performance, multicore support, and security.
 
@@ -83,7 +83,7 @@ But using four cores shaves about twenty minutes off:
 
 Pull requests and bug reports welcome.  If you find this work useful in your research, please cite it as 
 
-*   Tobin, J. (2012) flat-mcmc: A library for efficient, general purpose sampling.  [jtobin.github.com/flat-mcmc](jtobin.github.com/flat-mcmc)
+*   Tobin, J. (2012) **flat-mcmc**: A library for efficient, general purpose sampling.  [jtobin.github.com/flat-mcmc](jtobin.github.com/flat-mcmc)
 
 flat-mcmc is written and maintained by [Jared Tobin](http://jtobin.ca).  Page generated with [Hakyll](http://jaspervdj.be/hakyll/).
 
