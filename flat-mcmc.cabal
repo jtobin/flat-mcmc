@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                flat-mcmc
-version:             0.1.0.0
+version:             0.2.0.0
 synopsis:            Painless general-purpose sampling.
 -- description:         
 homepage:            http://jtobin.github.com/flat-mcmc
@@ -26,6 +26,6 @@ Source-repository head
 library
   exposed-modules:     Numeric.MCMC.Flat
   -- other-modules:       
-  build-depends:       base ==4.*, mtl ==2.1.*, primitive ==0.4.*, mwc-random ==0.12.*, vector ==0.9.*, monad-par ==0.3.*, monad-par-extras ==0.3.*
+  build-depends:       base >= 4.3, mtl >= 2.1, primitive >= 0.4, mwc-random >= 0.12, vector >= 0.9, monad-par >= 0.3, monad-par-extras >= 0.3
   ghc-options:         -Wall
 

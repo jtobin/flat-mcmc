@@ -34,16 +34,15 @@ main = do
         thinEvery = read (args !! 2) :: Int
         burnIn    = read (args !! 3) :: Int
         gran      = read (args !! 4) :: Int
-        params    = Options target (V.length inits) gran
-        config    = MarkovChain inits 0
+
+        opts       = Options { _size      = V.length inits
+                             , _nEpochs   = nepochs
+                             , _burnIn    = burnIn
+                             , _thinEvery = thinEvery
+                             , _csize     = gran             }
+
+        initState  = MarkovChain inits 0
 
     g       <- create
-    results <- runChain params nepochs burnIn thinEvery config g
-
-    hPutStrLn stderr $ 
-        let nAcc  = accepts results
-            total = nepochs * V.length inits * length (V.head inits)
-        in  show nAcc ++ " / " ++ show total ++ " (" ++ 
-              show ((fromIntegral nAcc / fromIntegral total) :: Float) ++ 
-              ") proposals accepted"
+    void $ runChain target opts initState g
 

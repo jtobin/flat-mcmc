@@ -40,9 +40,11 @@ instance Show MarkovChain where
 -- | Options for the chain.  The target (expected to be a log density), as
 --   well as the size of the ensemble.  The size should be an even number.  Also
 --   holds the specified parallel granularity as 'csize'.
-data Options = Options { _target :: [Double] -> Double    
-                       , _size   :: {-# UNPACK #-} !Int 
-                       , _csize  :: {-# UNPACK #-} !Int } 
+data Options = Options { _size      :: {-# UNPACK #-} !Int 
+                       , _nEpochs   :: {-# UNPACK #-} !Int  
+                       , _burnIn    :: {-# UNPACK #-} !Int
+                       , _thinEvery :: {-# UNPACK #-} !Int
+                       , _csize     :: {-# UNPACK #-} !Int } 
 
 -- | An ensemble of particles.
 type Ensemble = V.Vector [Double]
@@ -76,13 +78,14 @@ metropolisResult w0 w1 z zc target =
 --   perturbing them with affine transformations based on particles
 --   in a complementary ensemble, in parallel.
 executeMoves :: (Functor m, PrimMonad m)
-             => Ensemble                            -- Target sub-ensemble
+             => ([Double] -> Double)                -- Target to sample
+             -> Ensemble                            -- Target sub-ensemble
              -> Ensemble                            -- Complementary sub-ensemble
              -> Int                                 -- Size of the sub-ensembles
              -> Gen (PrimState m)                   -- MWC PRNG
              -> ViewsOptions m (Ensemble, Int)      -- Updated ensemble and # of accepts
-executeMoves e0 e1 n g = do
-    Options t _ csize <- ask
+executeMoves t e0 e1 n g = do
+    Options _ _ _ _ csize <- ask
 
     zs  <- replicateM n (lift $ symmetricVariate g)
     zcs <- replicateM n (lift $ uniformR (0 :: Double, 1 :: Double) g)
@@ -103,18 +106,19 @@ executeMoves e0 e1 n g = do
 --   perturbing each element and accepting/rejecting the perturbation in
 --   parallel.
 metropolisStep :: (Functor m, PrimMonad m)
-               => MarkovChain                   -- State of the Markov chain
+               => ([Double] -> Double)          -- Target to sample
+               -> MarkovChain                   -- State of the Markov chain
                -> Gen (PrimState m)             -- MWC PRNG
                -> ViewsOptions m MarkovChain    -- Updated sub-ensemble
-metropolisStep state g = do
-    Options _ n _ <- ask
+metropolisStep t state g = do
+    Options n _ _ _ _ <- ask
     let n0        = truncate (fromIntegral n / (2 :: Double)) :: Int
         (e, nacc) = (ensemble &&& accepts) state
         (e0, e1)  = (V.slice (0 :: Int) n0 &&& V.slice n0 n0) e
  
     -- Update each sub-ensemble 
-    result0 <- executeMoves e0 e1            n0 g
-    result1 <- executeMoves e1 (fst result0) n0 g
+    result0 <- executeMoves t e0 e1            n0 g
+    result1 <- executeMoves t e1 (fst result0) n0 g
 
     return $! 
       MarkovChain (V.concat $ map fst [result0, result1]) 
@@ -122,33 +126,36 @@ metropolisStep state g = do
 {-# INLINE metropolisStep #-}
 
 -- | Diffuse through states.
-runChain :: Options         -- Options of the Markov chain
-         -> Int             -- Number of epochs to iterate the chain
-         -> Int             -- Burn-in period
-         -> Int             -- Print every nth iteration.
-         -> MarkovChain     -- Initial state of the Markov chain
-         -> Gen RealWorld   -- MWC PRNG
-         -> IO MarkovChain  -- End state of the Markov chain, wrapped in IO
-runChain opts nepochs burnIn thinEvery initConfig g 
+runChain :: ([Double] -> Double) -- ^ Target to sample
+         -> Options              -- ^ Options of the Markov chain
+         -> MarkovChain          -- ^ Initial state of the Markov chain
+         -> Gen RealWorld        -- ^ MWC PRNG
+         -> IO MarkovChain       -- ^ End state of the Markov chain, wrapped in IO
+runChain target opts initState g 
     | l == 0 
         = error "runChain: ensemble must contain at least one particle"
-    | l < (length . V.head) (ensemble initConfig)
+    | l < (length . V.head) (ensemble initState)
         = do hPutStrLn stderr $ "runChain: ensemble should be twice as large as "
                              ++ "the target's dimension.  Continuing anyway."
-             go opts nepochs thinEvery initConfig g
+             go opts nepochs thinEvery initState g
     | burnIn < 0 || thinEvery < 0 = error "runChain: nonsensical burn-in or thinning input."
-    | otherwise = go opts nepochs thinEvery initConfig g
+    | otherwise = go opts nepochs thinEvery initState g
   where 
-    l = V.length (ensemble initConfig)
-    go o n t !c g0 | n == 0 = return c
+    Options l nepochs burnIn thinEvery _ = opts
+    go o n t !c g0 | n == 0 = hPutStrLn stderr  
+                                 (let nAcc  = accepts c
+                                      total = nepochs * l * length (V.head $ ensemble c)
+                                  in  show nAcc ++ " / " ++ show total ++ " (" ++
+                                      show ((fromIntegral nAcc / fromIntegral total) :: Float) ++ 
+                                      ") proposals accepted") >> return c
                    | n > (nepochs - burnIn) = do
-                       r <- runReaderT (metropolisStep c g0) o
+                       r <- runReaderT (metropolisStep target c g0) o
                        go o (n - 1) t r g0 
                    | n `rem` t /= 0 = do
-                       r <- runReaderT (metropolisStep c g0) o
+                       r <- runReaderT (metropolisStep target c g0) o
                        go o (n - 1) t r g0
                    | otherwise = do
-                       r <- runReaderT (metropolisStep c g0) o
+                       r <- runReaderT (metropolisStep target c g0) o
                        print r
                        go o (n - 1) t r g0
 {-# INLINE runChain #-}
