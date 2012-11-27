@@ -1,3 +1,4 @@
+import Control.Pipe
 import System.IO
 import System.Exit
 import System.Environment
@@ -24,14 +25,14 @@ main = do
     inits <- readInits (args !! 1)
 
     let nepochs = read (head args) :: Int
-        opts       = Options { _size      = V.length inits
-                             , _nEpochs   = nepochs
-                             , _burnIn    = 0
-                             , _thinEvery = 1
-                             , _csize     = 30               }
+        opts       = Options { _nEpochs    = nepochs
+                             , _burnIn     = 0
+                             , _printEvery = 1
+                             , _csize      = 30               }
 
         initState  = MarkovChain inits 0
 
     g       <- create
-    void $ runChain target opts initState g
+    results <- runPipe $ runChain target opts initState g >+> toList nepochs
+    print results
 

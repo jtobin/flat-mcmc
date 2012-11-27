@@ -1,11 +1,11 @@
 {-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE BangPatterns #-}
 
 module Numeric.MCMC.Flat (
             MarkovChain(..), Options(..), Ensemble
-          , runChain, readInits
+          , runChain, readInits, serializeToStdout, toVector
           ) where
 
+import Control.Pipe
 import Control.Arrow
 import Control.Monad
 import Control.Monad.Reader
@@ -17,7 +17,6 @@ import Control.Monad.Par                    (NFData)
 import Control.Monad.Par.Scheds.Direct
 import Control.Monad.Par.Combinator
 import GHC.Float
-import System.IO
 
 -- | Parallel map with a specified granularity.
 parMapChunk :: NFData b => Int -> (a -> b) -> [a] -> Par [b]
@@ -35,16 +34,16 @@ data MarkovChain = MarkovChain { ensemble :: Ensemble
 
 -- | Display the current state.  This will be very slow and should be replaced.
 instance Show MarkovChain where
-    show config = filter (`notElem` "[]") $ unlines $ map (show . map double2Float) (V.toList (ensemble config))
+    show config = filter (`notElem` "[]") $ unlines $ 
+        map (show . map double2Float) (V.toList (ensemble config))
 
 -- | Options for the chain.  The target (expected to be a log density), as
 --   well as the size of the ensemble.  The size should be an even number.  Also
 --   holds the specified parallel granularity as 'csize'.
-data Options = Options { _size      :: {-# UNPACK #-} !Int 
-                       , _nEpochs   :: {-# UNPACK #-} !Int  
-                       , _burnIn    :: {-# UNPACK #-} !Int
-                       , _thinEvery :: {-# UNPACK #-} !Int
-                       , _csize     :: {-# UNPACK #-} !Int } 
+data Options = Options { _nEpochs    :: {-# UNPACK #-} !Int  
+                       , _burnIn     :: {-# UNPACK #-} !Int
+                       , _printEvery :: {-# UNPACK #-} !Int
+                       , _csize      :: {-# UNPACK #-} !Int } 
 
 -- | An ensemble of particles.
 type Ensemble = V.Vector [Double]
@@ -69,7 +68,8 @@ metropolisResult :: [Double] -> [Double] -- Target and alternate particles
                  -> ([Double] -> Double) -- Target function
                  -> ([Double], Int)      -- Result and accept counter
 metropolisResult w0 w1 z zc target = 
-    let val      = target proposal - target w0 + (fromIntegral (length w0) - 1) * log z
+    let val      =   target proposal - target w0 
+                   + (fromIntegral (length w0) - 1) * log z
         proposal = zipWith (+) (map (*z) w0) (map (*(1-z)) w1) 
     in  if zc <= min 1 (exp val) then (proposal, 1) else (w0, 0)
 {-# INLINE metropolisResult #-}
@@ -77,19 +77,19 @@ metropolisResult w0 w1 z zc target =
 -- | Execute Metropolis steps on the particles of a sub-ensemble by
 --   perturbing them with affine transformations based on particles
 --   in a complementary ensemble, in parallel.
-executeMoves :: (Functor m, PrimMonad m)
-             => ([Double] -> Double)                -- Target to sample
-             -> Ensemble                            -- Target sub-ensemble
-             -> Ensemble                            -- Complementary sub-ensemble
-             -> Int                                 -- Size of the sub-ensembles
-             -> Gen (PrimState m)                   -- MWC PRNG
-             -> ViewsOptions m (Ensemble, Int)      -- Updated ensemble and # of accepts
+executeMoves :: PrimMonad m
+             => ([Double] -> Double)           -- Target to sample
+             -> Ensemble                       -- Target sub-ensemble
+             -> Ensemble                       -- Complementary sub-ensemble
+             -> Int                            -- Size of the sub-ensembles
+             -> Gen (PrimState m)              -- MWC PRNG
+             -> ViewsOptions m (Ensemble, Int) -- Updated ensemble/# of accepts
 executeMoves t e0 e1 n g = do
-    Options _ _ _ _ csize <- ask
+    Options _ _ _ csize <- ask
 
     zs  <- replicateM n (lift $ symmetricVariate g)
     zcs <- replicateM n (lift $ uniformR (0 :: Double, 1 :: Double) g)
-    js  <- fmap U.fromList (replicateM n (lift $ uniformR (1:: Int, n) g))
+    js  <- liftM U.fromList (replicateM n (lift $ uniformR (1:: Int, n) g))
 
     let w0 k    = e0 `V.unsafeIndex` (k - 1) 
         w1 k ks = e1 `V.unsafeIndex` ((ks `U.unsafeIndex` (k - 1)) - 1) 
@@ -105,16 +105,16 @@ executeMoves t e0 e1 n g = do
 -- | Perform a Metropolis accept/reject step on the ensemble by
 --   perturbing each element and accepting/rejecting the perturbation in
 --   parallel.
-metropolisStep :: (Functor m, PrimMonad m)
+metropolisStep :: PrimMonad m
                => ([Double] -> Double)          -- Target to sample
                -> MarkovChain                   -- State of the Markov chain
                -> Gen (PrimState m)             -- MWC PRNG
-               -> ViewsOptions m MarkovChain    -- Updated sub-ensemble
+               -> ViewsOptions m MarkovChain                 -- Updated sub-ensemble
 metropolisStep t state g = do
-    Options n _ _ _ _ <- ask
     let n0        = truncate (fromIntegral n / (2 :: Double)) :: Int
         (e, nacc) = (ensemble &&& accepts) state
         (e0, e1)  = (V.slice (0 :: Int) n0 &&& V.slice n0 n0) e
+        n         = V.length e
  
     -- Update each sub-ensemble 
     result0 <- executeMoves t e0 e1            n0 g
@@ -126,39 +126,34 @@ metropolisStep t state g = do
 {-# INLINE metropolisStep #-}
 
 -- | Diffuse through states.
-runChain :: ([Double] -> Double) -- ^ Target to sample
-         -> Options              -- ^ Options of the Markov chain
-         -> MarkovChain          -- ^ Initial state of the Markov chain
-         -> Gen RealWorld        -- ^ MWC PRNG
-         -> IO MarkovChain       -- ^ End state of the Markov chain, wrapped in IO
-runChain target opts initState g 
-    | l == 0 
-        = error "runChain: ensemble must contain at least one particle"
-    | l < (length . V.head) (ensemble initState)
-        = do hPutStrLn stderr $ "runChain: ensemble should be twice as large as "
-                             ++ "the target's dimension.  Continuing anyway."
-             go opts nepochs thinEvery initState g
-    | burnIn < 0 || thinEvery < 0 = error "runChain: nonsensical burn-in or thinning input."
-    | otherwise = go opts nepochs thinEvery initState g
-  where 
-    Options l nepochs burnIn thinEvery _ = opts
-    go o n t !c g0 | n == 0 = hPutStrLn stderr  
-                                 (let nAcc  = accepts c
-                                      total = nepochs * l * length (V.head $ ensemble c)
-                                  in  show nAcc ++ " / " ++ show total ++ " (" ++
-                                      show ((fromIntegral nAcc / fromIntegral total) :: Float) ++ 
-                                      ") proposals accepted") >> return c
-                   | n > (nepochs - burnIn) = do
-                       r <- runReaderT (metropolisStep target c g0) o
-                       go o (n - 1) t r g0 
-                   | n `rem` t /= 0 = do
-                       r <- runReaderT (metropolisStep target c g0) o
-                       go o (n - 1) t r g0
-                   | otherwise = do
-                       r <- runReaderT (metropolisStep target c g0) o
-                       print r
-                       go o (n - 1) t r g0
-{-# INLINE runChain #-}
+observe  :: PrimMonad m
+         => Options                                       -- ^ Options of the Markov chain
+         -> MarkovChain                                   -- ^ Initial state of the Markov chain
+         -> Gen (PrimState m)                             -- ^ MWC PRNG
+         -> Pipe ([Double] -> Double) MarkovChain m r     -- ^ End state of the Markov chain, wrapped in IO
+observe opts state g = forever $ do
+    target <- await
+    r      <- lift $ runReaderT (metropolisStep target state g) opts
+    yield r
+    observe opts r g
+
+-- | Run the Markov chain.
+runChain :: PrimMonad m 
+         => ([Double] -> Double) 
+         -> Options 
+         -> MarkovChain 
+         -> Gen (PrimState m) 
+         -> Producer MarkovChain m r 
+runChain target opts initState g = 
+    forever (yield target) >+> observe opts initState g 
+
+-- | Yield something to stdout via a simple print..
+serializeToStdout :: Show a => Consumer a IO ()
+serializeToStdout = forever $ await >>= lift . print
+
+-- | Take n of something and store them in a vector.
+toVector :: (U.Unbox a, Monad m) => Int -> Consumer a m (U.Vector a)
+toVector n = U.replicateM n await
 
 -- | A convenience function to read and parse ensemble inits from disk.  
 --   Assumes a text file with one particle per line, where each particle
