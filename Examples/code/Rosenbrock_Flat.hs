@@ -33,6 +33,5 @@ main = do
         initState  = MarkovChain inits 0
 
     g       <- create
-    results <- runPipe $ runChain target opts initState g >+> toList nepochs
-    print results
+    runPipe $ runChain target opts initState g >+> thinOutput 10 >+> yieldOnly nepochs >+> serializeToStdout
 

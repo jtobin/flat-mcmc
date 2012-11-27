@@ -2,7 +2,7 @@
 
 module Numeric.MCMC.Flat (
             MarkovChain(..), Options(..), Ensemble
-          , runChain, readInits, serializeToStdout, toVector
+          , runChain, readInits, serializeToStdout, storeInVector, thinOutput, yieldOnly
           ) where
 
 import Control.Pipe
@@ -147,13 +147,22 @@ runChain :: PrimMonad m
 runChain target opts initState g = 
     forever (yield target) >+> observe opts initState g 
 
--- | Yield something to stdout via a simple print..
+-- | Thin the output by throwing away n observations.
+thinOutput :: Monad m => Int -> Pipe a a m r
+thinOutput n = forever $ do
+    replicateM_ n await
+    await >>= yield
+
+yieldOnly :: Monad m => Int -> Pipe a a m ()
+yieldOnly n = replicateM_ n $ await >>= yield
+
+-- | Yield something to stdout via a simple print.
 serializeToStdout :: Show a => Consumer a IO ()
 serializeToStdout = forever $ await >>= lift . print
 
 -- | Take n of something and store them in a vector.
-toVector :: (U.Unbox a, Monad m) => Int -> Consumer a m (U.Vector a)
-toVector n = U.replicateM n await
+storeInVector :: (U.Unbox a, Monad m) => Int -> Consumer a m (U.Vector a)
+storeInVector n = U.replicateM n await
 
 -- | A convenience function to read and parse ensemble inits from disk.  
 --   Assumes a text file with one particle per line, where each particle
