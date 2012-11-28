@@ -11,6 +11,9 @@ target :: [Double] -> Double
 target [x0, x1] = (-1)*(5*(x1 - x0^2)^2 + 0.05*(1 - x0)^2)
 target _        = error "explode"
 
+deliver :: Int -> Consumer MarkovChain IO (V.Vector MarkovChain)
+deliver n = V.replicateM n await
+
 main = do
     args  <- getArgs 
     when (args == []) $ do
@@ -28,10 +31,9 @@ main = do
         opts       = Options { _nEpochs    = nepochs
                              , _burnIn     = 0
                              , _printEvery = 1
-                             , _csize      = 30               }
-
+                             , _csize      = 30      }
         initState  = MarkovChain inits 0
 
     g       <- create
-    runPipe $ runChain target opts initState g >+> thinOutput 10 >+> yieldOnly nepochs >+> serializeToStdout
+    runPipe $ runChain target opts initState g >+> thinOutput 10 >+> approxExpectationWith nepochs
 

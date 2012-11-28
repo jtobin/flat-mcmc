@@ -2,7 +2,8 @@
 
 module Numeric.MCMC.Flat (
             MarkovChain(..), Options(..), Ensemble
-          , runChain, readInits, serializeToStdout, storeInVector, thinOutput, yieldOnly
+          , observe, runChain, readInits, serializeToStdout
+          , approxExpectationWith, thinOutput, yieldOnly
           ) where
 
 import Control.Pipe
@@ -16,6 +17,7 @@ import qualified Data.Vector.Unboxed   as U
 import Control.Monad.Par                    (NFData)
 import Control.Monad.Par.Scheds.Direct
 import Control.Monad.Par.Combinator
+import System.IO
 import GHC.Float
 
 -- | Parallel map with a specified granularity.
@@ -131,7 +133,7 @@ observe  :: PrimMonad m
          -> MarkovChain                                   -- ^ Initial state of the Markov chain
          -> Gen (PrimState m)                             -- ^ MWC PRNG
          -> Pipe ([Double] -> Double) MarkovChain m r     -- ^ End state of the Markov chain, wrapped in IO
-observe opts state g = forever $ do
+observe opts state g = do
     target <- await
     r      <- lift $ runReaderT (metropolisStep target state g) opts
     yield r
@@ -161,8 +163,13 @@ serializeToStdout :: Show a => Consumer a IO ()
 serializeToStdout = forever $ await >>= lift . print
 
 -- | Take n of something and store them in a vector.
-storeInVector :: (U.Unbox a, Monad m) => Int -> Consumer a m (U.Vector a)
-storeInVector n = U.replicateM n await
+-- storeInVector :: Monad m => Int -> Consumer a m (V.Vector a)
+approxExpectationWith :: Int -> Consumer MarkovChain IO ()
+approxExpectationWith n = do
+    ms <- V.replicateM n await 
+    let vs = join $ V.map ensemble ms
+    lift $ hPrint stderr $ map (/ fromIntegral (V.length vs)) 
+                             (V.foldr (zipWith (+)) [0.0, 0.0] vs)
 
 -- | A convenience function to read and parse ensemble inits from disk.  
 --   Assumes a text file with one particle per line, where each particle
