@@ -35,5 +35,5 @@ main = do
         initState  = MarkovChain inits 0
 
     g       <- create
-    runPipe $ runChain target opts initState g >+> thinOutput 10 >+> approxExpectationWith nepochs
+    runPipe $ runChain target opts initState g >+> thinOutput 10 >+> serializeToStdout >+> approxExpectationWith nepochs
 

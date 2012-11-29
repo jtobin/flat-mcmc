@@ -159,8 +159,11 @@ yieldOnly :: Monad m => Int -> Pipe a a m ()
 yieldOnly n = replicateM_ n $ await >>= yield
 
 -- | Yield something to stdout via a simple print.
-serializeToStdout :: Show a => Consumer a IO ()
-serializeToStdout = forever $ await >>= lift . print
+serializeToStdout :: Show a => Pipe a a IO ()
+serializeToStdout = forever $ do
+    r <- await
+    lift $ print r
+    yield r
 
 -- | Take n of something and store them in a vector.
 -- storeInVector :: Monad m => Int -> Consumer a m (V.Vector a)
