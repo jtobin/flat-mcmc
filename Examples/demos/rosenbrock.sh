@@ -1,9 +1,9 @@
 #!/bin/bash
-DEST_DIR=/Users/jtobin/projects/flat-mcmc/Examples/data/output
+DEST_DIR=../data/output
 
 # consider passing these args to the script
 nepochs=1000
-inits=/Users/jtobin/projects/flat-mcmc/Examples/data/input/inits-2d.dat
+inits=../data/input/inits-2d.dat
 
 NOW=$(date +"%Y-%m-%d-%H%M")
 
