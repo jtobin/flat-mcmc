@@ -2,7 +2,7 @@
 
 module Numeric.MCMC.Flat (
             MarkovChain(..), Options(..), Ensemble
-          , observe, runChain, readInits, serializeToStdout
+          , observe, runChain, readInits, serializeToStdout, feed
           , approxExpectationWith, thinOutput, yieldOnly
           ) where
 
@@ -111,7 +111,7 @@ metropolisStep :: PrimMonad m
                => ([Double] -> Double)          -- Target to sample
                -> MarkovChain                   -- State of the Markov chain
                -> Gen (PrimState m)             -- MWC PRNG
-               -> ViewsOptions m MarkovChain                 -- Updated sub-ensemble
+               -> ViewsOptions m MarkovChain    -- Updated sub-ensemble
 metropolisStep t state g = do
     let n0        = truncate (fromIntegral n / (2 :: Double)) :: Int
         (e, nacc) = (ensemble &&& accepts) state
@@ -146,8 +146,13 @@ runChain :: PrimMonad m
          -> MarkovChain 
          -> Gen (PrimState m) 
          -> Producer MarkovChain m r 
-runChain target opts initState g = 
-    forever (yield target) >+> observe opts initState g 
+runChain target opts initState g = do
+    r <- lift $ runReaderT (metropolisStep target initState g) opts
+    yield r 
+    runChain target opts r g
+
+feed :: Monad m => Pipe a a m r
+feed = await >>= forever . yield
 
 -- | Thin the output by throwing away n observations.
 thinOutput :: Monad m => Int -> Pipe a a m r
@@ -162,7 +167,7 @@ yieldOnly n = replicateM_ n $ await >>= yield
 serializeToStdout :: Show a => Pipe a a IO ()
 serializeToStdout = forever $ do
     r <- await
-    lift $ print r
+    (lift . print) r
     yield r
 
 -- | Take n of something and store them in a vector.
@@ -173,6 +178,9 @@ approxExpectationWith n = do
     let vs = join $ V.map ensemble ms
     lift $ hPrint stderr $ map (/ fromIntegral (V.length vs)) 
                              (V.foldr (zipWith (+)) [0.0, 0.0] vs)
+
+
+
 
 -- | A convenience function to read and parse ensemble inits from disk.  
 --   Assumes a text file with one particle per line, where each particle

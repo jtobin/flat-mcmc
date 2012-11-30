@@ -1,4 +1,5 @@
 import Control.Pipe
+
 import System.IO
 import System.Exit
 import System.Environment
@@ -35,5 +36,7 @@ main = do
         initState  = MarkovChain inits 0
 
     g       <- create
-    runPipe $ runChain target opts initState g >+> thinOutput 10 >+> serializeToStdout >+> approxExpectationWith nepochs
+    runPipe $     runChain target opts initState g >+> yieldOnly nepochs
+              >+> serializeToStdout >+> forever (void await)
+              -- >+> approxExpectationWith nepochs
 
