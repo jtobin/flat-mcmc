@@ -5,7 +5,6 @@ dist
 Setup.hs
 *.hi
 *.o
-demos
 data
 _cache/
 _site/
@@ -13,3 +12,7 @@ build
 cabal-dev
 site
 benchmarks
+demos/BNN_Flat
+demos/Rosenbrock_Flat
+demos/Himmelblau_Flat
+demos/SPDE_Flat
