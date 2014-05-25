@@ -2,7 +2,6 @@
 *swp
 .DS_Store
 dist
-Setup.hs
 *.hi
 *.o
 data
@@ -16,3 +15,7 @@ demos/BNN_Flat
 demos/Rosenbrock_Flat
 demos/Himmelblau_Flat
 demos/SPDE_Flat
+sandbox
+.cabal-sandbox
+cabal.sandbox.config
+

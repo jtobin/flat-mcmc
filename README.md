@@ -2,5 +2,3 @@
 
 Painless general-purpose sampling.
 
-See the *Examples* folder for example usage.
-
