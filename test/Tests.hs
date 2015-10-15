@@ -7,7 +7,6 @@ import Control.Monad.State.Strict
 import qualified Data.Vector as V
 import qualified Data.Vector.Unboxed as U
 import Numeric.MCMC.Flat
-import System.Random.MWC.Probability
 
 lRosenbrock :: Density
 lRosenbrock xs =
@@ -32,6 +31,6 @@ origin = Chain {
 -- cabal test --show-details=streaming
 main :: IO ()
 main = withSystemRandom . asGenIO $ \g -> do
-  trace <- sample (replicateM 5000 (flat opts) `evalStateT` origin) g
+  trace <- sample (replicateM 5000 (flatGranular opts) `evalStateT` origin) g
   print trace
 

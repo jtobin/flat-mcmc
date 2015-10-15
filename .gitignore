@@ -18,4 +18,5 @@ demos/SPDE_Flat
 sandbox
 .cabal-sandbox
 cabal.sandbox.config
-
+.stack-work
+debug

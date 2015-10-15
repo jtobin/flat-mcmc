@@ -12,6 +12,8 @@ cabal-version:       >=1.8
 description:
 
     Painless general-purpose sampling.
+    .
+    Implements a Markov chain transition operator as a state monad.
 
 Source-repository head
   Type:     git

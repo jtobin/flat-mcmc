@@ -7,6 +7,7 @@ module Numeric.MCMC.Flat (
   , Ensemble
   , Density
   , flat
+  , flatGranular
   -- * System.Random.MWC
   , sample
   , withSystemRandom
