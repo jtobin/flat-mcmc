@@ -1,52 +1,34 @@
 name:                flat-mcmc
-version:             0.3.0.0
+version:             1.0.0
 synopsis:            Painless general-purpose sampling.
 homepage:            http://jtobin.github.com/flat-mcmc
-license:             BSD3
+license:             MIT
 license-file:        LICENSE
 author:              Jared Tobin
 maintainer:          jared@jtobin.ca
 category:            Math
 build-type:          Simple
-cabal-version:       >=1.8
+cabal-version:       >=1.10
 description:
 
     Painless general-purpose sampling.
-    .
-    Implements a Markov chain transition operator as a state monad.
 
 Source-repository head
   Type:     git
   Location: http://github.com/jtobin/flat-mcmc.git
 
 library
-  hs-source-dirs:
-    src
-  exposed-modules:
-    Numeric.MCMC.Flat
+  default-language: Haskell2010
+  ghc-options:      -Wall
+  hs-source-dirs:   src
+  exposed-modules:  Numeric.MCMC.Flat
   build-depends:
-      base             >= 4.3 && < 5
-    , mtl              >= 2.1
-    , primitive        >= 0.4
-    , mwc-random       >= 0.12
-    , mwc-probability  >= 0.1
-    , vector           >= 0.9
-    , monad-par        >= 0.3
-    , monad-par-extras >= 0.3
-  ghc-options:
-    -Wall
-
-Test-Suite rosenbrock
-  type:                exitcode-stdio-1.0 
-  hs-source-dirs:      src, test
-  main-is:             Tests.hs
-  build-depends:
-      base             >= 4.3
-    , mtl              >= 2.1
-    , primitive        >= 0.4
-    , mwc-random       >= 0.12
-    , mwc-probability  >= 0.1
-    , vector           >= 0.9
-    , monad-par        >= 0.3
-    , monad-par-extras >= 0.3
+      base             <  5
+    , lens             >= 4 && < 5
+    , mcmc-types       >= 1.0.1
+    , monad-par
+    , mwc-probability  >= 1.0.1
+    , pipes            >= 4 && < 5
+    , primitive
+    , transformers
 

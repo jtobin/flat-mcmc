@@ -3,4 +3,5 @@ packages:
   - '.'
 extra-deps:
   - mwc-probability-1.0.2
+  - mcmc-types-1.0.1
 resolver: lts-3.8
