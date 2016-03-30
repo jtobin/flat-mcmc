@@ -1,7 +1,17 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Numeric.MCMC.Flat (mcmc) where
+module Numeric.MCMC.Flat (
+    mcmc
+  , flat
+
+  , module Sampling.Types
+  , Chain
+  , MWC.create
+  , MWC.createSystemRandom
+  , MWC.withSystemRandom
+  , MWC.asGenIO
+  ) where
 
 import Control.Monad (replicateM)
 import Control.Monad.Par (NFData)
@@ -9,7 +19,7 @@ import Control.Monad.Par.Scheds.Direct hiding (put, get)
 import Control.Monad.Par.Combinator (parMap)
 import Control.Monad.Primitive (PrimMonad, PrimState, RealWorld)
 import Control.Monad.Trans.State.Strict (get, put, execStateT)
-import Data.Sampling.Types hiding (Chain(..))
+import Data.Sampling.Types as Sampling.Types hiding (Chain(..))
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import qualified Data.Vector.Unboxed as U
