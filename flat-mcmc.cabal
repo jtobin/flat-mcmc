@@ -24,11 +24,12 @@ library
   exposed-modules:  Numeric.MCMC.Flat
   build-depends:
       base             <  5
-    , lens             >= 4 && < 5
-    , mcmc-types       >= 1.0.1
+    , mcmc-types       >= 1.0.1 && < 2
     , monad-par
-    , mwc-probability  >= 1.0.1
+    , monad-par-extras
+    , mwc-probability  >= 1.0.1 && < 2
     , pipes            >= 4 && < 5
     , primitive
     , transformers
+    , vector
 
