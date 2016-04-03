@@ -70,7 +70,7 @@ execute
 execute target e0 e1 n = do
   zs  <- replicateM n symmetric
   zcs <- replicateM n uniform
-  vjs <- replicateM n uniform
+  vjs <- replicateM n (uniformR (1, n))
 
   let js      = U.fromList vjs
       w0 k    = e0 `V.unsafeIndex` pred k
