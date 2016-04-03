@@ -12,9 +12,9 @@ In general this sampler is useful when you want decent performance without
 dealing with any tuning parameters or local proposal distributions.  Check out
 the paper describing the algorithm
 [here](http://msp.org/camcos/2010/5-1/camcos-v5-n1-p04-p.pdf), and a paper on
-some potential limitations [here](http://arxiv.org/abs/1509.02230).
-
-http://arxiv.org/abs/1509.02230
+some potential limitations [here](http://arxiv.org/abs/1509.02230).  There is
+also also a robust Python implementation
+[here](http://dan.iel.fm/emcee/current/).
 
 *flat-mcmc* exports an 'mcmc' function that prints a trace to stdout, as well
 as a 'flat' transition operator that can be used more generally.
