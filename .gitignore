@@ -20,3 +20,4 @@ sandbox
 cabal.sandbox.config
 .stack-work
 debug
+Examples
