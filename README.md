@@ -40,7 +40,7 @@ ensemble = fromList [
   ]
 
 main :: IO ()
-main = withSystemRandom . asGenIO $ mcmc 25000 ensemble rosenbrock
+main = withSystemRandom . asGenIO $ mcmc 12500 ensemble rosenbrock
 ```
 
 ![trace](http://jtobin.ca/flat-mcmc/img/Rosenbrock_AIE.png)

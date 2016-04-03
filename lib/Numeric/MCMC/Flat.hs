@@ -80,13 +80,16 @@ execute target e0 e1 n = do
   zcs <- replicateM n uniform
   vjs <- replicateM n (uniformR (1, n))
 
-  let js      = U.fromList vjs
+  let granularity = truncate (fromIntegral n / 2)
+
+      js      = U.fromList vjs
       w0 k    = e0 `V.unsafeIndex` pred k
       w1 k ks = e1 `V.unsafeIndex` pred (ks `U.unsafeIndex` pred k)
 
+
       worker (k, z, zc) = move target (w0 k) (w1 k js) z zc
       result = runPar $
-        parMapChunk 2 worker (zip3 [1..n] zs zcs) -- FIXME granularity option
+        parMapChunk granularity worker (zip3 [1..n] zs zcs)
 
   return $ V.fromList result
 
