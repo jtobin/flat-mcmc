@@ -4,6 +4,8 @@
 module Numeric.MCMC.Flat (
     mcmc
   , flat
+  , Particle
+  , Ensemble
 
   , module Sampling.Types
   , Chain
@@ -33,7 +35,13 @@ data Chain = Chain {
   }
 
 instance Show Chain where
-  show Chain {..} = show chainPosition -- FIXME better?
+  show Chain {..} =
+      init
+    . filter (`notElem` "[]")
+    . unlines
+    . V.toList
+    . V.map show
+    $ chainPosition
 
 type Particle = Vector Double
 
@@ -56,7 +64,7 @@ move :: Target Particle -> Particle -> Particle -> Double -> Double -> Particle
 move target p0 p1 z zc =
   let proposal = stretch p0 p1 z
       pAccept  = acceptProb target p0 proposal z
-  in  if   zc <= min 0 pAccept
+  in  if   zc <= min 1 (exp pAccept)
       then proposal
       else p0
 
