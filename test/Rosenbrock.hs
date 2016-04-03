@@ -3,19 +3,18 @@
 module Main where
 
 import Numeric.MCMC.Flat
-import Data.Vector (Vector)
-import qualified Data.Vector as V (toList, fromList)
+import Data.Vector (Vector, toList, fromList)
 
 rosenbrock :: Vector Double -> Double
 rosenbrock xs = negate (5  *(x1 - x0 ^ 2) ^ 2 + 0.05 * (1 - x0) ^ 2) where
-  [x0, x1] = V.toList xs
+  [x0, x1] = toList xs
 
 ensemble :: Ensemble
-ensemble = V.fromList [
-    V.fromList [negate 1.0, negate 1.0]
-  , V.fromList [negate 1.0, 1.0]
-  , V.fromList [1.0, negate 1.0]
-  , V.fromList [1.0, 1.0]
+ensemble = fromList [
+    fromList [negate 1.0, negate 1.0]
+  , fromList [negate 1.0, 1.0]
+  , fromList [1.0, negate 1.0]
+  , fromList [1.0, 1.0]
   ]
 
 main :: IO ()
