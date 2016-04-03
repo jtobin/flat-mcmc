@@ -18,5 +18,5 @@ ensemble = fromList [
   ]
 
 main :: IO ()
-main = withSystemRandom . asGenIO $ mcmc 25000 ensemble rosenbrock
+main = withSystemRandom . asGenIO $ mcmc 100 ensemble rosenbrock
 
