@@ -16,9 +16,10 @@ In general this sampler is useful when you want decent performance without
 dealing with any tuning parameters or local proposal distributions.  Check out
 the paper describing the algorithm
 [here](http://msp.org/camcos/2010/5-1/camcos-v5-n1-p04-p.pdf), and a paper on
-some potential limitations [here](http://arxiv.org/abs/1509.02230).  There is
-also also a robust Python implementation
-[here](http://dan.iel.fm/emcee/current/) authored by [Dan
+some potential limitations [here](http://arxiv.org/abs/1509.02230), authored
+by my friends David Huijser and [Brendon
+Brewer](https://www.stat.auckland.ac.nz/~brewer/).  There is also also a robust
+Python implementation [here](http://dan.iel.fm/emcee/current/) authored by [Dan
 Foreman-Mackey](http://dan.iel.fm), a very nice dude who I once moved some
 furniture with.
 
