@@ -1,14 +1,35 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 {-# LANGUAGE RecordWildCards #-}
 
+-- |
+-- Module: Numeric.MCMC.Flat
+-- Copyright: (c) 2016 Jared Tobin
+-- License: MIT
+--
+-- Maintainer: Jared Tobin <jared@jtobin.ca>
+-- Stability: unstable
+-- Portability: ghc
+--
+-- This is the 'affine invariant ensemble' or AIEMCMC algorithm described in
+-- Goodman and Weare, 2010.  It is a reasonably efficient and hassle-free
+-- sampler, requiring no mucking with tuning parameters or local proposal
+-- distributions.
+--
+-- The 'mcmc' function streams a trace to stdout to be processed elsewhere,
+-- while the `flat` transition can be used for more flexible purposes,
+-- such as working with samples in memory.
+--
+-- See <http://msp.org/camcos/2010/5-1/camcos-v5-n1-p04-p.pdf> for the definitive
+-- reference of the algorithm.
+
 module Numeric.MCMC.Flat (
     mcmc
   , flat
   , Particle
   , Ensemble
+  , Chain
 
   , module Sampling.Types
-  , Chain
   , MWC.create
   , MWC.createSystemRandom
   , MWC.withSystemRandom
@@ -93,6 +114,8 @@ execute target e0 e1 n = do
 
   return $ V.fromList result
 
+-- | The 'flat' transition operator for driving a Markov chain over a space
+--   of ensembles.
 flat
   :: PrimMonad m
   => Transition m Chain
@@ -114,6 +137,34 @@ chain = loop where
     yield next
     loop next prng
 
+-- | Trace 'n' iterations of a Markov chain and stream them to stdout.
+--
+--   Note that the Markov chain is defined over the space of ensembles, so
+--   you'll need to provide an ensemble of particles for the start location.
+--
+-- >>> import Numeric.MCMC.Flat
+-- >>> import Data.Vector (Vector, toList, fromList)
+-- >>> :{
+-- >>>   let rosenbrock xs = negate (5  *(x1 - x0 ^ 2) ^ 2 + 0.05 * (1 - x0) ^ 2)
+--             where [x0, x1] = toList xs
+-- >>> :}
+-- >>> :{
+-- >>> let ensemble = fromList [
+-- >>>       fromList [negate 1.0, negate 1.0]
+-- >>>     , fromList [negate 1.0, 1.0]
+-- >>>     , fromList [1.0, negate 1.0]
+-- >>>     , fromList [1.0, 1.0]
+-- >>>     ]
+-- >>> :}
+-- >>> withSystemRandom . asGenIO $ mcmc 2 ensemble rosenbrock
+-- -1.0,-1.0
+-- -1.0,1.0
+-- 1.0,-1.0
+-- 0.7049046915549257,0.7049046915549257
+-- -0.843493377618159,-0.843493377618159
+-- -1.1655594505975082,1.1655594505975082
+-- 0.5466534497342876,-0.9615123448709006
+-- 0.7049046915549257,0.7049046915549257
 mcmc :: Int -> Ensemble -> (Particle -> Double) -> Gen RealWorld -> IO ()
 mcmc n chainPosition target gen = runEffect $
         chain Chain {..} gen
@@ -122,6 +173,7 @@ mcmc n chainPosition target gen = runEffect $
   where
     chainTarget = Target target Nothing
 
+-- A parallel map with the specified granularity.
 parMapChunk :: NFData b => Int -> (a -> b) -> [a] -> Par [b]
 parMapChunk n f xs = concat <$> parMap (map f) (chunk n xs) where
   chunk _ [] = []
