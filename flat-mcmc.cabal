@@ -1,5 +1,5 @@
 name:                flat-mcmc
-version:             1.0.0
+version:             1.0.1
 synopsis:            Painless general-purpose sampling.
 homepage:            http://jtobin.github.com/flat-mcmc
 license:             MIT
@@ -10,10 +10,10 @@ category:            Math
 build-type:          Simple
 cabal-version:       >=1.10
 description:
-  *flat-mcmc* is a Haskell library for painless, efficient, general-purpose
+  flat-mcmc is a Haskell library for painless, efficient, general-purpose
   sampling from continuous distributions.
   .
-  *flat-mcmc* uses an ensemble sampler that is invariant to affine
+  flat-mcmc uses an ensemble sampler that is invariant to affine
   transformations of space.  It wanders a target probability distribution's
   parameter space as if it had been "flattened" or "unstretched" in some sense,
   allowing many particles to explore it locally and in parallel.
@@ -21,7 +21,7 @@ description:
   In general this sampler is useful when you want decent performance without
   dealing with any tuning parameters or local proposal distributions.
   .
-  *flat-mcmc* exports an 'mcmc' function that prints a trace to stdout, as well
+  flat-mcmc exports an 'mcmc' function that prints a trace to stdout, as well
   as a 'flat' transition operator that can be used more generally.
   .
   > import Numeric.MCMC.Flat
