@@ -64,7 +64,7 @@ instance Show Chain where
     . V.map show
     $ chainPosition
 
-type Particle = Vector Double
+type Particle = U.Vector Double
 
 type Ensemble = Vector Particle
 
@@ -73,13 +73,13 @@ symmetric = fmap transform uniform where
   transform z = 0.5 * (z + 1) ^ (2 :: Int)
 
 stretch :: Particle -> Particle -> Double -> Particle
-stretch p0 p1 z = V.zipWith (+) (V.map (* z) p0) (V.map (* (1 - z)) p1)
+stretch p0 p1 z = U.zipWith (+) (U.map (* z) p0) (U.map (* (1 - z)) p1)
 
 acceptProb :: Target Particle -> Particle -> Particle -> Double -> Double
 acceptProb target particle proposal z =
     lTarget target proposal
   - lTarget target particle
-  + log z * (fromIntegral (V.length particle) - 1)
+  + log z * (fromIntegral (U.length particle) - 1)
 
 move :: Target Particle -> Particle -> Particle -> Double -> Double -> Particle
 move target p0 p1 z zc =

@@ -1,5 +1,5 @@
 name:                flat-mcmc
-version:             1.0.1
+version:             1.1.1
 synopsis:            Painless general-purpose sampling.
 homepage:            http://jtobin.github.com/flat-mcmc
 license:             MIT
@@ -52,12 +52,12 @@ library
   hs-source-dirs:   lib
   exposed-modules:  Numeric.MCMC.Flat
   build-depends:
-      base             <  5
+      base             >  4     && < 6
     , mcmc-types       >= 1.0.1 && < 2
-    , monad-par
-    , monad-par-extras
+    , monad-par        >= 0.3.4.8 && < 1
+    , monad-par-extras >= 0.3.3 && < 1
     , mwc-probability  >= 1.0.1 && < 2
-    , pipes            >= 4 && < 5
+    , pipes            >  4     && < 5
     , primitive
     , transformers
     , vector
@@ -70,7 +70,7 @@ Test-suite rosenbrock
   ghc-options:
     -rtsopts -threaded
   build-depends:
-      base              < 5
+      base
     , flat-mcmc
     , vector
 
@@ -82,7 +82,7 @@ Test-suite bnn
   ghc-options:
     -rtsopts -threaded
   build-depends:
-      base              < 5
+      base
     , flat-mcmc
     , vector
 
