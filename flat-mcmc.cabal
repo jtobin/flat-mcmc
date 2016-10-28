@@ -54,7 +54,7 @@ library
   build-depends:
       base             >  4     && < 6
     , mcmc-types       >= 1.0.1 && < 2
-    , monad-par        >= 0.3.4.8 && < 1
+    , monad-par        >= 0.3.4.7 && < 1
     , monad-par-extras >= 0.3.3 && < 1
     , mwc-probability  >= 1.0.1 && < 2
     , pipes            >  4     && < 5
