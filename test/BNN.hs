@@ -6,7 +6,7 @@ import Numeric.MCMC.Flat
 import qualified Data.Vector.Unboxed as U (Vector, toList, fromList)
 import qualified Data.Vector as V (fromList)
 
-bnn :: U.Vector Double -> Double
+bnn :: Particle -> Double
 bnn xs = -0.5 * (x0 ^ 2 * x1 ^ 2 + x0 ^ 2 + x1 ^ 2 - 8 * x0 - 8 * x1) where
   [x0, x1] = U.toList xs
 

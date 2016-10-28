@@ -6,7 +6,7 @@ import Numeric.MCMC.Flat
 import qualified Data.Vector.Unboxed as U (Vector, toList, fromList)
 import qualified Data.Vector as V (fromList)
 
-rosenbrock :: U.Vector Double -> Double
+rosenbrock :: Particle -> Double
 rosenbrock xs = negate (5  *(x1 - x0 ^ 2) ^ 2 + 0.05 * (1 - x0) ^ 2) where
   [x0, x1] = U.toList xs
 
