@@ -1,7 +1,7 @@
 name:                flat-mcmc
-version:             1.2.1
+version:             1.2.2
 synopsis:            Painless general-purpose sampling.
-homepage:            http://jtobin.github.com/flat-mcmc
+homepage:            https://github.com/jtobin/flat-mcmc
 license:             MIT
 license-file:        LICENSE
 author:              Jared Tobin
@@ -25,18 +25,19 @@ description:
   as a 'flat' transition operator that can be used more generally.
   .
   > import Numeric.MCMC.Flat
-  > import Data.Vector (Vector, toList, fromList)
+  > import qualified Data.Vector.Unboxed as U (Vector, toList, fromList)
+  > import qualified Data.Vector as V (fromList)
   >
-  > rosenbrock :: Vector Double -> Double
-  > rosenbrock xs = negate (5  *(x1 - x0 ^ 2) ^ 2 + 0.05 * (1 - x0) ^ 2) where
-  >   [x0, x1] = toList xs
+  > rosenbrock :: Particle -> Double
+  > rosenbrock xs = negate (5  * (x1 - x0 ^ 2) ^ 2 + 0.05 * (1 - x0) ^ 2) where
+  >   [x0, x1] = U.toList xs
   >
   > ensemble :: Ensemble
-  > ensemble = fromList [
-  >     fromList [negate 1.0, negate 1.0]
-  >   , fromList [negate 1.0, 1.0]
-  >   , fromList [1.0, negate 1.0]
-  >   , fromList [1.0, 1.0]
+  > ensemble = V.fromList [
+  >     U.fromList [negate 1.0, negate 1.0]
+  >   , U.fromList [negate 1.0, 1.0]
+  >   , U.fromList [1.0, negate 1.0]
+  >   , U.fromList [1.0, 1.0]
   >   ]
   >
   > main :: IO ()
