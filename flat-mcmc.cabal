@@ -89,3 +89,14 @@ Test-suite bnn
     , flat-mcmc
     , vector
 
+executable bnn-example
+  hs-source-dirs:      src
+  main-is:             Main.hs
+  default-language:    Haskell2010
+  ghc-options:
+    -rtsopts -threaded
+  build-depends:
+      base
+    , flat-mcmc
+    , vector
+
