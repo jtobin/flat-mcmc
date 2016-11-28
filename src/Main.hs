@@ -3,7 +3,7 @@
 module Main where
 
 import Numeric.MCMC.Flat
-import qualified Data.Vector.Unboxed as U (Vector, toList, fromList)
+import qualified Data.Vector.Unboxed as U (toList, fromList)
 import qualified Data.Vector as V (fromList)
 
 bnn :: Particle -> Double
@@ -19,5 +19,5 @@ ensemble = V.fromList [
   ]
 
 main :: IO ()
-main = withSystemRandom . asGenIO $ mcmc 1000 ensemble bnn
+main = withSystemRandom . asGenIO $ mcmc 10000 ensemble bnn
 

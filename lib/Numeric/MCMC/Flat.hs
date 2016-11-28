@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -39,8 +40,8 @@ module Numeric.MCMC.Flat (
 
 import Control.Monad (replicateM)
 import Control.Monad.Par (NFData)
-import Control.Monad.Par.Scheds.Direct hiding (put, get)
 import Control.Monad.Par.Combinator (parMap)
+import Control.Monad.Par.Scheds.Sparks hiding (get)
 import Control.Monad.Primitive (PrimMonad, PrimState, RealWorld)
 import Control.Monad.Trans.State.Strict (get, put, execStateT)
 import Data.Monoid
@@ -104,8 +105,8 @@ acceptProb target particle proposal z =
 {-# INLINE acceptProb #-}
 
 move :: Target Particle -> Particle -> Particle -> Double -> Double -> Particle
-move target p0 p1 z zc =
-  let proposal = stretch p0 p1 z
+move target !p0 p1 z zc =
+  let !proposal = stretch p0 p1 z
       pAccept  = acceptProb target p0 proposal z
   in  if   zc <= min 1 (exp pAccept)
       then proposal
@@ -122,17 +123,16 @@ execute
 execute target e0 e1 n = do
   zs  <- replicateM n symmetric
   zcs <- replicateM n uniform
-  vjs <- replicateM n (uniformR (1, n))
+  js  <- U.replicateM n (uniformR (1, n))
 
   let granularity = truncate (fromIntegral n / 2)
 
-      js      = U.fromList vjs
       w0 k    = e0 `V.unsafeIndex` pred k
       w1 k ks = e1 `V.unsafeIndex` pred (ks `U.unsafeIndex` pred k)
 
 
       worker (k, z, zc) = move target (w0 k) (w1 k js) z zc
-      result = runPar $
+      !result = runPar $
         parMapChunk granularity worker (zip3 [1..n] zs zcs)
 
   return $! V.fromList result
@@ -151,8 +151,8 @@ flat = do
       e1   = V.unsafeSlice n n chainPosition
   result0 <- lift (execute chainTarget e0 e1 n)
   result1 <- lift (execute chainTarget e1 result0 n)
-  let ensemble = V.concat [result0, result1]
-  put (Chain chainTarget ensemble)
+  let !ensemble = V.concat [result0, result1]
+  put $! (Chain chainTarget ensemble)
 {-# INLINE flat #-}
 
 chain :: PrimMonad m => Chain -> Gen (PrimState m) -> Producer Chain m ()
