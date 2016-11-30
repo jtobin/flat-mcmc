@@ -28,23 +28,23 @@ as a 'flat' transition operator that can be used more generally.
 
 ``` haskell
 import Numeric.MCMC.Flat
-import qualified Data.Vector.Unboxed as U (Vector, toList, fromList)
-import qualified Data.Vector as V (fromList)
+import qualified Data.Vector.Unboxed as U (unsafeIndex)
 
 rosenbrock :: Particle -> Double
 rosenbrock xs = negate (5  * (x1 - x0 ^ 2) ^ 2 + 0.05 * (1 - x0) ^ 2) where
-  [x0, x1] = U.toList xs
+  x0 = U.unsafeIndex xs 0
+  x1 = U.unsafeIndex xs 1
 
-ensemble :: Ensemble
-ensemble = V.fromList [
-    U.fromList [negate 1.0, negate 1.0]
-  , U.fromList [negate 1.0, 1.0]
-  , U.fromList [1.0, negate 1.0]
-  , U.fromList [1.0, 1.0]
+origin :: Ensemble
+origin = ensemble [
+    particle [negate 1.0, negate 1.0]
+  , particle [negate 1.0, 1.0]
+  , particle [1.0, negate 1.0]
+  , particle [1.0, 1.0]
   ]
 
 main :: IO ()
-main = withSystemRandom . asGenIO $ mcmc 12500 ensemble rosenbrock
+main = withSystemRandom . asGenIO $ mcmc 12500 origin rosenbrock
 ```
 
 ![trace](http://jtobin.ca/flat-mcmc/img/Rosenbrock_AIE.png)

@@ -36,6 +36,9 @@ module Numeric.MCMC.Flat (
   , MWC.createSystemRandom
   , MWC.withSystemRandom
   , MWC.asGenIO
+
+  , VE.ensemble
+  , VE.particle
   ) where
 
 import Control.Monad (replicateM)
@@ -50,6 +53,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T (putStrLn)
 import Data.Vector (Vector)
 import qualified Data.Vector as V
+import qualified Data.Vector.Extended as VE (ensemble, particle)
 import qualified Data.Vector.Unboxed as U
 import Formatting ((%))
 import qualified Formatting as F
@@ -83,8 +87,20 @@ renderEnsemble =
     glue a b = a <> "\n" <> renderParticle b
 {-# INLINE renderEnsemble #-}
 
+-- | A particle is an n-dimensional point in Euclidean space.
+--
+--   You can create a particle by using the 'particle' helper function, or just
+--   use Data.Vector.Unboxed.fromList.
 type Particle = U.Vector Double
 
+-- | An ensemble is a collection of particles.
+--
+--   The Markov chain we're interested in will run over the space of ensembles,
+--   so you'll want to build an ensemble out of a reasonable number of
+--   particles to kick off the chain.
+--
+--   You can create an ensemble by using the 'ensemble' helper function, or just
+--   use Data.Vector.fromList.
 type Ensemble = Vector Particle
 
 symmetric :: PrimMonad m => Prob m Double
@@ -130,7 +146,6 @@ execute target e0 e1 n = do
       w0 k    = e0 `V.unsafeIndex` pred k
       w1 k ks = e1 `V.unsafeIndex` pred (ks `U.unsafeIndex` pred k)
 
-
       worker (k, z, zc) = move target (w0 k) (w1 k js) z zc
       !result = runPar $
         parMapChunk granularity worker (zip3 [1..n] zs zcs)
@@ -169,20 +184,20 @@ chain = loop where
 --   you'll need to provide an ensemble of particles for the start location.
 --
 -- >>> import Numeric.MCMC.Flat
--- >>> import Data.Vector (Vector, toList, fromList)
+-- >>> import Data.Vector.Unboxed (toList)
 -- >>> :{
 -- >>>   let rosenbrock xs = negate (5  *(x1 - x0 ^ 2) ^ 2 + 0.05 * (1 - x0) ^ 2)
 --             where [x0, x1] = toList xs
 -- >>> :}
 -- >>> :{
--- >>> let ensemble = fromList [
--- >>>       fromList [negate 1.0, negate 1.0]
--- >>>     , fromList [negate 1.0, 1.0]
--- >>>     , fromList [1.0, negate 1.0]
--- >>>     , fromList [1.0, 1.0]
+-- >>> let origin = ensemble [
+-- >>>       particle [negate 1.0, negate 1.0]
+-- >>>     , particle [negate 1.0, 1.0]
+-- >>>     , particle [1.0, negate 1.0]
+-- >>>     , particle [1.0, 1.0]
 -- >>>     ]
 -- >>> :}
--- >>> withSystemRandom . asGenIO $ mcmc 2 ensemble rosenbrock
+-- >>> withSystemRandom . asGenIO $ mcmc 2 origin rosenbrock
 -- -1.0,-1.0
 -- -1.0,1.0
 -- 1.0,-1.0

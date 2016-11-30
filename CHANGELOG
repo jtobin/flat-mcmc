@@ -1,0 +1,7 @@
+# Changelog
+
+- 1.4.0 (2016-12-01)
+		* Export the 'particle' and 'ensemble' helper aliases to make it a little
+		  less burdensome to create an origin for a Markov chain.
+
+
