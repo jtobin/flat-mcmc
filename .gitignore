@@ -4,7 +4,6 @@
 dist
 *.hi
 *.o
-data
 _cache/
 _site/
 build
