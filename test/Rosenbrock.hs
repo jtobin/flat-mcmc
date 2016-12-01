@@ -3,11 +3,12 @@
 module Main where
 
 import Numeric.MCMC.Flat
-import qualified Data.Vector.Unboxed as U (toList)
+import qualified Data.Vector.Unboxed as U (unsafeIndex)
 
 rosenbrock :: Particle -> Double
 rosenbrock xs = negate (5  *(x1 - x0 ^ 2) ^ 2 + 0.05 * (1 - x0) ^ 2) where
-  [x0, x1] = U.toList xs
+  x0 = U.unsafeIndex xs 0
+  x1 = U.unsafeIndex xs 1
 
 origin :: Ensemble
 origin = ensemble [

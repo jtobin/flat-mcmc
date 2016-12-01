@@ -141,7 +141,7 @@ execute target e0 e1 n = do
   zcs <- replicateM n uniform
   js  <- U.replicateM n (uniformR (1, n))
 
-  let granularity = truncate (fromIntegral n / 2)
+  let granularity = n `div` 2
 
       w0 k    = e0 `V.unsafeIndex` pred k
       w1 k ks = e1 `V.unsafeIndex` pred (ks `U.unsafeIndex` pred k)
