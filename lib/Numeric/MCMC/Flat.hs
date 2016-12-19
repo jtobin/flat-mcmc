@@ -42,10 +42,11 @@ module Numeric.MCMC.Flat (
   ) where
 
 import Control.Monad (replicateM)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Par (NFData)
 import Control.Monad.Par.Combinator (parMap)
 import Control.Monad.Par.Scheds.Sparks hiding (get)
-import Control.Monad.Primitive (PrimMonad, PrimState, RealWorld)
+import Control.Monad.Primitive (PrimMonad, PrimState)
 import Control.Monad.Trans.State.Strict (get, put, execStateT)
 import Data.Monoid
 import Data.Sampling.Types as Sampling.Types hiding (Chain(..))
@@ -206,11 +207,17 @@ chain = loop where
 -- -1.1655594505975082,1.1655594505975082
 -- 0.5466534497342876,-0.9615123448709006
 -- 0.7049046915549257,0.7049046915549257
-mcmc :: Int -> Ensemble -> (Particle -> Double) -> Gen RealWorld -> IO ()
+mcmc
+  :: (MonadIO m, PrimMonad m)
+  => Int
+  -> Ensemble
+  -> (Particle -> Double)
+  -> Gen (PrimState m)
+  -> m ()
 mcmc n chainPosition target gen = runEffect $
         chain Chain {..} gen
     >-> Pipes.take n
-    >-> Pipes.mapM_ (T.putStrLn . render)
+    >-> Pipes.mapM_ (liftIO . T.putStrLn . render)
   where
     chainTarget = Target target Nothing
 {-# INLINE mcmc #-}

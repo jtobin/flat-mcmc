@@ -1,7 +1,10 @@
 # Changelog
 
+- 1.5.0 (2016-12-20)
+    * Generalize base monad.
+
 - 1.4.0 (2016-12-01)
-		* Export the 'particle' and 'ensemble' helper aliases to make it a little
-		  less burdensome to create an origin for a Markov chain.
+    * Export the 'particle' and 'ensemble' helper aliases to make it a little
+      less burdensome to create an origin for a Markov chain.
 
 

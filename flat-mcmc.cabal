@@ -1,5 +1,5 @@
 name:                flat-mcmc
-version:             1.4.2
+version:             1.5.0
 synopsis:            Painless general-purpose sampling.
 homepage:            https://github.com/jtobin/flat-mcmc
 license:             MIT
