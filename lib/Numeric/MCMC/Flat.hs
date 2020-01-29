@@ -48,7 +48,6 @@ import Control.Monad.Par.Combinator (parMap)
 import Control.Monad.Par.Scheds.Sparks hiding (get)
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Control.Monad.Trans.State.Strict (get, put, execStateT)
-import Data.Monoid
 import Data.Sampling.Types as Sampling.Types hiding (Chain(..))
 import qualified Data.Text as T
 import qualified Data.Text.IO as T (putStrLn)
