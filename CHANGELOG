@@ -1,5 +1,8 @@
 # Changelog
 
+- 1.5.2 (2020-10-10)
+    * Bump 'formatting' dependency.
+
 - 1.5.0 (2016-12-20)
     * Generalize base monad.
 

@@ -1,5 +1,5 @@
 name:                flat-mcmc
-version:             1.5.1
+version:             1.5.2
 synopsis:            Painless general-purpose sampling.
 homepage:            https://github.com/jtobin/flat-mcmc
 license:             MIT
@@ -62,7 +62,7 @@ library
 
   build-depends:
       base             >  4     && < 6
-    , formatting       >= 6     && < 7
+    , formatting       >= 6     && < 8
     , mcmc-types       >= 1.0.1 && < 2
     , monad-par        >= 0.3.4.7 && < 1
     , monad-par-extras >= 0.3.3 && < 1
