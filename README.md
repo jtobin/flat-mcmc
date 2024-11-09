@@ -1,6 +1,5 @@
 # flat-mcmc
 
-[![Build Status](https://secure.travis-ci.org/jtobin/flat-mcmc.png)](http://travis-ci.org/jtobin/flat-mcmc)
 [![Hackage Version](https://img.shields.io/hackage/v/flat-mcmc.svg)](http://hackage.haskell.org/package/flat-mcmc)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jtobin/flat-mcmc/blob/master/LICENSE)
 
